@@ -1,124 +1,110 @@
-import React from "react";
-import "./index.css";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
 import NavbarLaw from "./Navbar";
 import Footer from "./Footer";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { changeMode } from "../Slices/Modes/Mode";
-import axios from "axios";
 import Loader from "./Loader";
+import { changeMode } from "../Slices/Modes/Mode";
+import "./index.css";
 
 export default function SubLaw() {
-  //-----------------Routing Catching parameters
-  let navigate = useNavigate();
-  let location = useLocation();
-
-  //------------Navigate to home---------
-  const MoreInfoComponent = (text) => {
-    navigate(`/${text}`, { state: "Main" });
-  };
-
-  //-------------------Dark and Light mode method -------------
-
+  const navigate = useNavigate();
+  const location = useLocation();
   const count = useSelector((state) => state.counter.value);
   const dispatch = useDispatch();
 
-  let [mode, setmode] = useState(true);
-  let [bgcol, setbgcol] = useState("white");
-  let [txtcol, settxtcol] = useState("#1a1a1a");
-  let [title, settitle] = useState("");
-  let [summary, setsummary] = useState("");
-
-  const changeBG = () => {
-    if (count === false) {
-      setbgcol("white");
-      settxtcol("#1a1a1a");
-      setmode(true);
-    } else {
-      setbgcol("#1a1a1a");
-      settxtcol("white");
-      setmode(false);
-    }
-  };
+  const [mode, setMode] = useState(true);
+  const [bgColor, setBgColor] = useState("white");
+  const [textColor, setTextColor] = useState("#1a1a1a");
+  const [lawName, setLawName] = useState("");
+  const [sectionsList, setSectionsList] = useState([]);
+  const [chapterList, setChapterList] = useState([]);
 
   useEffect(() => {
-    changeBG();
+    handleModeChange();
   }, [count]);
+
+  useEffect(() => {
+    const lawIndex = new URLSearchParams(window.location.search).get("law");
+    if (lawIndex) {
+      fetchSections(lawIndex);
+    }
+  }, []);
+
+  const handleModeChange = () => {
+    if (count) {
+      setBgColor("#1a1a1a");
+      setTextColor("white");
+      setMode(false);
+    } else {
+      setBgColor("white");
+      setTextColor("#1a1a1a");
+      setMode(true);
+    }
+  };
 
   const handleToggle = () => {
     dispatch(changeMode());
   };
 
-  //-------------------------------Navigtes to the sections Content component--------------------------------
-  let [lawName, setLawname] = useState("");
-  const [SectionsList, setSectionsList] = useState([]);
-  const [chapterList, setChapterList] = useState([]);
+  const fetchSections = async (law) => {
+    try {
+      const response = await axios.get(
+        `https://legis-code.onrender.com/LawSections/${law}`
+      );
+      const data = response.data;
+      setSectionsList(data);
+      setLawName(data.name);
+      setChapterList(data.Chapters);
+    } catch (error) {
+      console.error(error);
+      alert("Got Error While Getting Try Again..!");
+    }
+  };
 
-  const ToSubLawDetails = (chapterIndex, sectionIndex) => {
-    let lawIndex = window.location.href.split("?")[1].slice(4);
-
+  const navigateToSubLawDetails = (chapterIndex, sectionIndex) => {
+    const lawIndex = new URLSearchParams(window.location.search).get("law");
     navigate(
       `/LawDetails?law=${lawIndex}&chapter=${chapterIndex}&section=${sectionIndex}`
     );
   };
 
-  const GetSections = (law) => {
-    axios
-      .get(`https://legis-code.onrender.com/LawSections/${law}`)
-      .then((e) => {
-        console.log(e.data);
-        setSectionsList(e.data);
-        setLawname(e.data.name);
-        setChapterList(e.data.Chapters);
-        console.log(chapterList);
-      })
-      .catch((e) => {
-        console.log(e);
-        alert("Got Error While Getting Try Again..!");
-      });
+  const navigateTo = (text) => {
+    navigate(`/${text}`, { state: "Main" });
   };
 
-  let [law, setLaw] = useState("");
-
-  useEffect(() => {
-    let lawIndex = window.location.href.split("?")[1].slice(4);
-    // let newLaw = lawName.replaceAll("%20", " ");
-    // setLaw(newLaw);
-    GetSections(lawIndex);
-  }, []);
-
-  //---------------------Dom Elements --------------------
-
-  let MainCon = (
-    <div style={{ background: bgcol }}>
-      <NavbarLaw />{" "}
+  const mainContent = (
+    <div style={{ background: bgColor }}>
+      <NavbarLaw />
       <div className="sub-title">
         <p className="path-container">
-          <span className="path" onClick={() => MoreInfoComponent("")}>
+          <span className="path" onClick={() => navigateTo("")}>
             Home
           </span>{" "}
-          /{" "}
-          <span className="path" onClick={() => MoreInfoComponent("law")}>
+          /
+          <span className="path" onClick={() => navigateTo("law")}>
             Laws
-          </span>
-          {"   "}/ {"   "}
-          {lawName}
+          </span>{" "}
+          / {lawName}
         </p>
-        <h1>{}</h1>
+        <h1>{lawName}</h1>
       </div>
-      <div className="summary" style={{ color: txtcol, background: bgcol }}>
+      <div
+        className="summary"
+        style={{ color: textColor, background: bgColor }}
+      >
         <h4
           className="chapter-name"
           style={{
-            color: txtcol,
-            background: bgcol,
+            color: textColor,
+            background: bgColor,
             marginLeft: "20px",
             display: "flex",
             justifyContent: "space-between",
           }}
         >
-          Summary :{"  "}
+          Summary :
           <div
             className="toggler"
             onClick={handleToggle}
@@ -128,22 +114,19 @@ export default function SubLaw() {
               className="togglediv"
               style={{
                 transition: "all 0.5s ease",
-                float: `${mode == true ? "left" : "right"}`,
+                float: mode ? "left" : "right",
               }}
             ></div>
           </div>
         </h4>
         <p>
           <ul className="summary-ul">
-            {Array.isArray(SectionsList.summary) ? (
-              <>
-                {" "}
-                {/* {SectionsList.summary.map((ele) => {
-                  return <li>{ele}</li>;
-                })} */}
-              </>
+            {Array.isArray(sectionsList.summary) ? (
+              sectionsList.summary.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))
             ) : (
-              <>{SectionsList.summary}</>
+              <>{sectionsList.summary}</>
             )}
           </ul>
         </p>
@@ -151,56 +134,50 @@ export default function SubLaw() {
       <div
         className="SubLawContainer"
         style={{
-          color: txtcol,
-          background: bgcol,
+          color: textColor,
+          background: bgColor,
           minHeight: "400px",
           paddingBottom: "50px",
         }}
       >
-        {chapterList.map((e, ind) => {
-          return (
-            <li
-              key={e.name}
-              style={{ listStyleType: "none" }}
-              className="outer-li"
+        {chapterList.map((chapter, chapterIndex) => (
+          <li
+            key={chapter.name}
+            style={{ listStyleType: "none" }}
+            className="outer-li"
+          >
+            <h4
+              className="chapter-name"
+              style={{ color: textColor, background: bgColor }}
             >
-              <h4
-                className="chapter-name"
-                style={{
-                  color: txtcol,
-                  background: bgcol,
-                }}
-              >
-                Chapter {"  "}
-                {e.name
-                  .split(" ")
-                  .map((word, index) =>
-                    index === 0
-                      ? word.toUpperCase()
-                      : word.charAt(0).toUpperCase() +
-                        word.slice(1).toLowerCase()
-                  )
-                  .join(" ")}
-              </h4>
-              <ul className="Sections-names">
-                {e.sections.map((sec, ind2) => {
-                  return (
-                    <li
-                      key={sec.name}
-                      onClick={() => ToSubLawDetails(ind, ind2)}
-                    >
-                      {sec.name}
-                    </li>
-                  );
-                })}
-              </ul>
-            </li>
-          );
-        })}
+              Chapter{" "}
+              {chapter.name
+                .split(" ")
+                .map((word, index) =>
+                  index === 0
+                    ? word.toUpperCase()
+                    : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                )
+                .join(" ")}
+            </h4>
+            <ul className="Sections-names">
+              {chapter.sections.map((section, sectionIndex) => (
+                <li
+                  key={section.name}
+                  onClick={() =>
+                    navigateToSubLawDetails(chapterIndex, sectionIndex)
+                  }
+                >
+                  {section.name}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
       </div>
       <Footer />
     </div>
   );
 
-  return <>{chapterList.length != 0 ? <>{MainCon}</> : <Loader />}</>;
+  return <>{chapterList.length ? mainContent : <Loader />}</>;
 }

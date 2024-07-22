@@ -65,7 +65,7 @@ export default function UploadPage() {
       .then((e) => {
         console.log(e.data);
         alert("uploaded");
-        navigate("/BlogUpload");
+        navigate("/BlogUpload/1");
       })
       .catch((e) => {
         console.log(e);

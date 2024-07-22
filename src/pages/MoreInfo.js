@@ -1,74 +1,69 @@
 import React, { useState, useEffect } from "react";
 import NavbarLaw from "./Navbar";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./index.css";
 import Footer from "./Footer";
-import { useNavigate } from "react-router-dom";
 import { BsFacebook, BsInstagram, BsTwitter, BsLinkedin } from "react-icons/bs";
 import axios from "axios";
 import Loader from "./Loader";
 
 export default function MoreInfo() {
-  let location = useLocation();
-  let navigate = useNavigate();
-  const MoreInfoComponent = (text) => {
-    navigate(`${text}/?p=1`, { state: "sub" });
-  };
-
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-
-  let [data, setData] = useState({});
-
-  const GetData = (id) => {
-    axios
-      .get(`https://legis-code.onrender.com/getBlog/${id}`)
-      .then((e) => {
-        console.log(e.data);
-        setData(e.data);
-      })
-      .catch((e) => {
-        console.log(e);
-        alert("Got Error While Getting Try Again..!");
-      });
-  };
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [data, setData] = useState({});
 
   useEffect(() => {
-    let id = window.location.href.split("?")[1].slice(3);
-    // alert(id);
-    GetData(id);
+    const id = new URLSearchParams(window.location.search).get("id");
+    if (id) {
+      fetchBlogData(id);
+    }
   }, []);
 
-  let MainCon = (
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
+  const fetchBlogData = async (id) => {
+    try {
+      const response = await axios.get(
+        `https://legis-code.onrender.com/getBlog/${id}`
+      );
+      setData(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("Got Error While Getting Try Again..!");
+    }
+  };
+
+  const navigateTo = (path) => {
+    navigate(`${path}/?p=1`, { state: "sub" });
+  };
+
+  const mainContent = (
     <>
       <NavbarLaw />
-
       <div className="sub-title">
         <p className="path-container">
-          {" "}
-          <span className="path" onClick={() => MoreInfoComponent("")}>
+          <span className="path" onClick={() => navigateTo("")}>
             Home
           </span>{" "}
-          /{" "}
-          <span className="path" onClick={() => MoreInfoComponent("/blog")}>
+          /
+          <span className="path" onClick={() => navigateTo("/blog")}>
             Blogs
-          </span>{" "}
+          </span>
         </p>
-        <h1> {data.title}</h1>
+        <h1>{data.title}</h1>
       </div>
-
       <section className="container-fluid">
         <div className="row card-blog-outer">
           <div className="col-md-12">
             <h2 className="blog-main-title">{data.title}</h2>
-
             <div className="Published">
               <h5>
                 Published by <b>Legis Code</b>
               </h5>
               <h6>January 20, 2024</h6>
             </div>
-
             <div className="sub-blog-image-outer">
               <img
                 src={data.image?.replace(
@@ -76,16 +71,16 @@ export default function MoreInfo() {
                   "https://legis-code.onrender.com"
                 )}
                 className="sub-blog-image"
+                alt={data.title}
               />
             </div>
-
             <p className="blog-para">{data.desc}</p>
           </div>
-        </div>{" "}
+        </div>
       </section>
       <Footer />
     </>
   );
 
-  return <>{data?.title != undefined ? <>{MainCon}</> : <Loader />}</>;
+  return <>{data?.title ? mainContent : <Loader />}</>;
 }

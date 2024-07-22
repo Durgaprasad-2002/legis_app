@@ -1,216 +1,191 @@
-import React from "react";
-import NavbarLaw from "./Navbar";
-import "./index.css";
-import { BsSearch, BsArrowRight } from "react-icons/bs";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Footer from "./Footer";
-import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { changeMode } from "../Slices/Modes/Mode";
-import { AiOutlineClose } from "react-icons/ai";
 import axios from "axios";
+import NavbarLaw from "./Navbar";
+import Footer from "./Footer";
 import Loader from "./Loader";
+import { changeMode } from "../Slices/Modes/Mode";
+import { BsSearch } from "react-icons/bs";
+import { AiOutlineClose } from "react-icons/ai";
+import "./index.css";
 
 export default function Laws() {
-  //--------------------to navigate Home------------------------------------
-  let location = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isDarkMode = useSelector((state) => state.counter.value);
+
+  const [mode, setMode] = useState(true);
+  const [lawName, setLawName] = useState("");
+  const [lawsList, setLawsList] = useState([]);
+  const [searchColor, setSearchColor] = useState("#cccccc");
+  const [closeButtonVisibility, setCloseButtonVisibility] = useState("hidden");
+  const [bgColor, setBgColor] = useState("white");
+  const [textColor, setTextColor] = useState("#1a1a1a");
+  const [notFoundVisibility, setNotFoundVisibility] = useState("none");
 
   useEffect(() => {
-    if (location?.state == "Main") {
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
+    if (location?.state === "Main") {
+      window.scrollTo(0, 0);
     }
-  }, [location]);
+    fetchLaws();
+    changeBG();
+  }, [location, isDarkMode]);
 
-  let [LawName, setLawName] = useState("");
-
-  let navigate = useNavigate();
-  const MoreInfoComponent = (text) => {
-    navigate(`/${text}?law=${LawName}`, { state: "sub" });
+  const fetchLaws = async () => {
+    try {
+      const response = await axios.get(
+        `https://legis-code.onrender.com/lawNames`
+      );
+      setLawsList(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("Got Error While Getting Try Again..!");
+    }
   };
-
-  //---------------To change search bar Colors----------------------------------------------------
-  const count = useSelector((state) => state.counter.value);
-  const dispatch = useDispatch();
-
-  let [col, setcol] = useState("#cccccc");
-  let [cldis, setcldis] = useState("hidden");
-  const change = () => {
-    setcol("#4296f4");
-    setcldis("visible");
-  };
-  const notchange = () => {
-    setcol("#cccccc");
-    if (document.getElementById("search").value == "") setcldis("hidden");
-  };
-
-  //---------------To switch b/w  Dark and Light Mode -------------------------------------------
-
-  let [mode, setmode] = useState(true);
-  let [bgcol, setbgcol] = useState("white");
-  let [txtcol, settxtcol] = useState("#1a1a1a");
-  let [typ, settype] = useState("none");
 
   const changeBG = () => {
-    if (count == true) {
-      setbgcol("#1a1a1a");
-      settxtcol("white");
-      setmode(false);
+    if (isDarkMode) {
+      setBgColor("#1a1a1a");
+      setTextColor("white");
+      setMode(false);
     } else {
-      setbgcol("white");
-      settxtcol("#1a1a1a");
-      setmode(true);
+      setBgColor("white");
+      setTextColor("#1a1a1a");
+      setMode(true);
     }
   };
 
-  useEffect(() => {
-    changeBG();
-  }, [count]);
+  const handleSearchFocus = () => {
+    setSearchColor("#4296f4");
+    setCloseButtonVisibility("visible");
+  };
 
-  const handleToggle = () => {
+  const handleSearchBlur = () => {
+    setSearchColor("#cccccc");
+    if (!lawName) setCloseButtonVisibility("hidden");
+  };
+
+  const handleToggleMode = () => {
     dispatch(changeMode());
   };
 
-  //-----------Method for redirecting to sections----------------------------------
-
-  const ToSubLaw = (val, ind) => {
-    // alert(ind);
-    navigate(`/LawSection?law=${ind}`);
+  const handleLawClick = (law, index) => {
+    navigate(`/LawSection?law=${index}`);
   };
 
-  const [lawsList, setlawsList] = useState([]);
-
-  const GetLaws = () => {
-    axios
-      .get(`https://legis-code.onrender.com/lawNames`)
-      .then((e) => {
-        console.log(e.data);
-        setlawsList(e.data);
-      })
-      .catch((e) => {
-        console.log(e);
-        alert("Got Error While Getting Try Again..!");
-      });
+  const handleMoreInfoClick = () => {
+    navigate("/", { state: "sub" });
   };
 
-  useEffect(() => {
-    GetLaws();
-  }, []);
+  const handleSearchChange = (event) => {
+    const { value } = event.target;
+    setLawName(value);
+    filterLaws(value);
+  };
 
-  //---------------------Dom Elements-----------------------------------------------
+  const handleRemoveSearch = () => {
+    setLawName("");
+    filterLaws("");
+    handleSearchBlur();
+  };
 
-  let mainCon = (
-    <div style={{ background: bgcol }}>
-      <NavbarLaw mode={mode} />{" "}
-      <div className="sub-title">
-        <p className="path-container">
-          <span className="path" onClick={() => MoreInfoComponent("")}>
-            Home
-          </span>{" "}
-          /
-        </p>
-        <h1>Laws</h1>
-      </div>
-      <section className="search-container" style={{ background: bgcol }}>
-        <div className="search-outer" style={{ borderColor: col }}>
-          <BsSearch id="iconSearch" style={{ color: col }} />
-          <input
-            typeof="search"
-            onKeyUp={FilterLaws}
-            placeholder="search Law"
-            className="search"
-            id="search"
-            onFocus={change}
-            onBlur={notchange}
-            style={{ background: bgcol, color: txtcol }}
-          />
-          <AiOutlineClose
-            onClick={() => Remove()}
-            className="close"
-            style={{ visibility: cldis, background: bgcol, color: txtcol }}
-          />
-        </div>
-        <div>
-          <div className="toggler" onClick={handleToggle}>
-            <div
-              className="togglediv"
-              style={{
-                transition: "all 0.5s ease",
-                float: `${mode == true ? "left" : "right"}`,
-              }}
-            ></div>
-          </div>
-        </div>
-      </section>
-      <section
-        className="Law-columns"
-        style={{ background: bgcol, minHeight: "500px" }}
-      >
-        <ul className="ul-container" style={{ listStyleType: "number" }}>
-          {lawsList.map((ele, ind) => {
-            return (
-              <h3
-                className="Law-col-item"
-                style={{ color: txtcol }}
-                key={ele}
-                onClick={() => ToSubLaw(ele, ind)}
-              >
-                <li>{ele}</li>
-              </h3>
-            );
-          })}
-        </ul>
-        <div style={{ display: typ }} className="not-found">
-          <h4>Oops!</h4>
-          <h6 style={{ color: txtcol }}>
-            We can't seem to find the <b>Law</b> <br />
-            you're looking for
-          </h6>
-        </div>
-      </section>
-      <Footer />
-    </div>
-  );
+  const filterLaws = (query) => {
+    const filter = query.toUpperCase();
+    const filteredLaws = lawsList.filter((law) =>
+      law.toUpperCase().includes(filter)
+    );
+    setLawsList(filteredLaws);
 
-  //-------------------To remove typed text in search field --------------------------
-
-  function Remove() {
-    document.getElementById("search").value = "";
-    FilterLaws();
-    notchange();
-  }
-
-  //--------------------Filtering the Laws from search Input -------------------
-
-  function FilterLaws() {
-    let input = document.getElementById("search");
-    let filter = input.value.toUpperCase();
-    let container = document.getElementsByTagName("ul")[0];
-    let eachval = container.getElementsByClassName("Law-col-item");
-    let count = 0;
-
-    for (var i = 0; i < eachval.length; i++) {
-      let a = container.getElementsByClassName("Law-col-item")[i];
-
-      let txtValue = a.textContent || a.innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        eachval[i].style.display = "block";
-      } else {
-        eachval[i].style.display = "none";
-      }
-      if (eachval[i].style.display === "block") {
-        count++;
-      }
-    }
-
-    if (count == 0) {
-      setcol("red");
-      settype("block");
+    if (filteredLaws.length === 0) {
+      setSearchColor("red");
+      setNotFoundVisibility("block");
     } else {
-      setcol("#4296f4");
-      settype("none");
+      setSearchColor("#4296f4");
+      setNotFoundVisibility("none");
     }
-  }
+  };
 
-  return <>{lawsList.length != 0 ? <>{mainCon}</> : <Loader />}</>;
+  return (
+    <>
+      {lawsList.length !== 0 ? (
+        <div style={{ background: bgColor }}>
+          <NavbarLaw mode={isDarkMode} />
+          <div className="sub-title">
+            <p className="path-container">
+              <span className="path" onClick={handleMoreInfoClick}>
+                Home
+              </span>
+              /
+            </p>
+            <h1>Laws</h1>
+          </div>
+          <section className="search-container" style={{ background: bgColor }}>
+            <div className="search-outer" style={{ borderColor: searchColor }}>
+              <BsSearch id="iconSearch" style={{ color: searchColor }} />
+              <input
+                type="search"
+                value={lawName}
+                onChange={handleSearchChange}
+                placeholder="search Law"
+                className="search"
+                id="search"
+                onFocus={handleSearchFocus}
+                onBlur={handleSearchBlur}
+                style={{ background: bgColor, color: textColor }}
+              />
+              <AiOutlineClose
+                onClick={handleRemoveSearch}
+                className="close"
+                style={{
+                  visibility: closeButtonVisibility,
+                  background: bgColor,
+                  color: textColor,
+                }}
+              />
+            </div>
+            <div>
+              <div className="toggler" onClick={handleToggleMode}>
+                <div
+                  className="togglediv"
+                  style={{
+                    transition: "all 0.5s ease",
+                    float: mode ? "left" : "right",
+                  }}
+                ></div>
+              </div>
+            </div>
+          </section>
+          <section
+            className="Law-columns"
+            style={{ background: bgColor, minHeight: "500px" }}
+          >
+            <ul className="ul-container" style={{ listStyleType: "number" }}>
+              {lawsList.map((law, index) => (
+                <h3
+                  className="Law-col-item"
+                  style={{ color: textColor }}
+                  key={law}
+                  onClick={() => handleLawClick(law, index)}
+                >
+                  <li>{law}</li>
+                </h3>
+              ))}
+            </ul>
+            <div style={{ display: notFoundVisibility }} className="not-found">
+              <h4>Oops!</h4>
+              <h6 style={{ color: textColor }}>
+                We can't seem to find the <b>Law</b> <br />
+                you're looking for
+              </h6>
+            </div>
+          </section>
+          <Footer />
+        </div>
+      ) : (
+        <Loader />
+      )}
+    </>
+  );
 }
