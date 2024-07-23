@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import NavbarLaw from "./Navbar";
 import Footer from "./Footer";
-import Loader from "./Loader";
+import Loader from "./Loader_LAWS";
 import { changeMode } from "../Slices/Modes/Mode";
 import "./index.css";
 
@@ -125,10 +125,12 @@ export default function SubLawDetails() {
           </span>{" "}
           /
           <span className="path" onClick={() => navigateTo("law")}>
+            {" "}
             Laws
           </span>{" "}
           /
           <span className="path" onClick={navigateToChapter}>
+            {" "}
             Chapters
           </span>{" "}
           /
@@ -139,7 +141,7 @@ export default function SubLawDetails() {
       <div
         className="SubLawDetails"
         style={{
-          minHeight: "80vh",
+          minHeight: "68vh",
           background: bgColor,
           color: textColor,
           paddingBottom: "50px",

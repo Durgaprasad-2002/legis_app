@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import NavbarLaw from "./Navbar";
 import Footer from "./Footer";
-import Loader from "./Loader";
+import Loader from "./Loader_LAWS";
 import { changeMode } from "../Slices/Modes/Mode";
 import { BsSearch } from "react-icons/bs";
 import { AiOutlineClose } from "react-icons/ai";
@@ -115,7 +115,7 @@ export default function Laws() {
           <div className="sub-title">
             <p className="path-container">
               <span className="path" onClick={handleMoreInfoClick}>
-                Home
+                Home{" "}
               </span>
               /
             </p>

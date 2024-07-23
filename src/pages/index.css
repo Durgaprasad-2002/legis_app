@@ -302,9 +302,8 @@ footer {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-around;
-  align-items: flex-start;
-  justify-items: stretch;
+  justify-content: space-evenly;
+  align-items: start;
 }
 
 .col-item {
@@ -324,7 +323,8 @@ footer {
 }
 
 .img-blog {
-  object-fit: cover;
+  object-fit: fill;
+  object-position: center;
   transition: all 0.3s linear;
   position: relative;
   width: 100%;

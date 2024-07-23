@@ -67,14 +67,17 @@ export default function Blog() {
               "https://legis-code.onrender.com"
             )}
             alt={blog.title}
+            onError={(e) =>
+              (e.currentTarget.src =
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdxXTJfjkJRIYLXuESrhcWOZFpV6b27WQFoXKXWMqxs_7X2HNR5b9h93oNkWszI6uNj2k&usqp=CAU")
+            }
           />
         </div>
         <div className="outer-linker">
           <BsLink45Deg className="linker" />
         </div>
         <h6 className="date">
-          Published in <b>Legis Law</b> on{" "}
-          {new Date(blog.publishedDate).toLocaleDateString()}
+          Published in <b>Legis Law</b> on January 20, 2024
         </h6>
         <h3>{blog.title}</h3>
         <span onClick={() => navigateToMoreInfo(blog._id)}>Read More ››</span>
@@ -116,7 +119,7 @@ export default function Blog() {
             )}
           </div>
           <br />
-          <h5 className="tog-btn-above">More content</h5>
+          <h5 className="tog-btn-above"></h5>
           <div className="toggle-button">
             <button onClick={() => handlePageChange(-1)} disabled={pageno <= 1}>
               <FaCaretLeft /> Prev

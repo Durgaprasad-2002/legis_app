@@ -1,18 +1,13 @@
-// import logo from "./logo.svg";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy } from "react";
-// import Home from "./pages/Home";
-// import Blog from "./pages/Blog";
-// import MoreInfo from "./pages/MoreInfo";
-// import Laws from "./pages/Laws";
-// import SubLaw from "./pages/SubLaw";
-// import SubLawDetails from "./pages/SubLawDetails";
+
 import { Suspense } from "react";
 import Terms from "./pages/Terms";
 import BlogLogin from "./pages/BlogLogin";
 import BlogUploadHome from "./pages/BlogUploadHome";
 import UploadPage from "./pages/UploadPage";
-import Loader from "./pages/Loader";
+import Loader from "./pages/Loader_LAWS";
+import Loader_LAWS from "./pages/Loader_LAWS";
 
 const Laws = lazy(() => import("./pages/Laws"));
 const SubLaw = lazy(() => import("./pages/SubLaw"));

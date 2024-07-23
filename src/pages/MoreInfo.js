@@ -72,6 +72,10 @@ export default function MoreInfo() {
                 )}
                 className="sub-blog-image"
                 alt={data.title}
+                onError={(e) =>
+                  (e.currentTarget.src =
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdxXTJfjkJRIYLXuESrhcWOZFpV6b27WQFoXKXWMqxs_7X2HNR5b9h93oNkWszI6uNj2k&usqp=CAU")
+                }
               />
             </div>
             <p className="blog-para">{data.desc}</p>

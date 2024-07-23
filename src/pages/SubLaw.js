@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import NavbarLaw from "./Navbar";
 import Footer from "./Footer";
-import Loader from "./Loader";
+import Loader from "./Loader_LAWS";
 import { changeMode } from "../Slices/Modes/Mode";
 import "./index.css";
 
@@ -84,6 +84,7 @@ export default function SubLaw() {
           </span>{" "}
           /
           <span className="path" onClick={() => navigateTo("law")}>
+            {" "}
             Laws
           </span>{" "}
           / {lawName}
