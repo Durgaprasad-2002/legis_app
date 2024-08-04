@@ -95,7 +95,7 @@ export default function Home() {
         <p className="quote">
           <br />
           <span className="spacer"></span>
-          Lawyers for Lawyers promotes and preserves the independence of the
+          Lawyers for Lawyer promotes and preserves the independence of the
           legal profession worldwide and defends the professional rights of
           lawyers to provide legal services safely and independently, without
           fear of reprisal. We safeguard the lawyers’ role in protecting the
